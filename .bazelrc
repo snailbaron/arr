@@ -1,0 +1,9 @@
+common --registry=https://raw.githubusercontent.com/snailbaron/registry/main
+common --registry=https://bcr.bazel.build
+
+build --compilation_mode=dbg
+build --cxxopt=-std=c++26
+build --copt=-Wall --copt=-Wextra --copt=-Wpedantic
+build --copt=-fdiagnostics-color
+
+build:release --compilation_mode=opt

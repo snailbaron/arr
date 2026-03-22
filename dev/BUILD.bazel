@@ -1,0 +1,8 @@
+load("@snailbaron-compilation-database//:compdb.bzl", "compilation_database")
+
+compilation_database(
+    name = "db",
+    srcs = [
+        "//src/arr",
+    ],
+)
