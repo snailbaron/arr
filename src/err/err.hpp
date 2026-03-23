@@ -13,13 +13,14 @@ public:
     constexpr Error(
         std::string_view message,
         std::source_location sl = std::source_location::current())
-        : _message(std::format(
-            "{}:{}:{} ({}): {}",
-            sl.file_name(),
-            sl.line(),
-            sl.column(),
-            sl.function_name(),
-            message))
+        : _message(
+              std::format(
+                  "{}:{}:{} ({}): {}",
+                  sl.file_name(),
+                  sl.line(),
+                  sl.column(),
+                  sl.function_name(),
+                  message))
     { }
 
     [[nodiscard]] constexpr const char* what() const noexcept override

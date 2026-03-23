@@ -12,7 +12,7 @@ int main()
     auto timer = FrameTimer{60};
     for (;;) {
         bool done = false;
-        for (auto e = SDL_Event{}; SDL_PollEvent(&e) && !done; ) {
+        for (auto e = SDL_Event{}; SDL_PollEvent(&e) && !done;) {
             if (e.type == SDL_EVENT_QUIT) {
                 done = true;
             }

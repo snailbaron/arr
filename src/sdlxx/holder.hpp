@@ -4,7 +4,7 @@
 
 namespace sdl::internal {
 
-template <class T, void(*deleter)(T*)>
+template <class T, void (*deleter)(T*)>
 class Holder {
 public:
     constexpr explicit Holder(T* ptr) noexcept
@@ -23,7 +23,7 @@ public:
     }
 
 private:
-    std::unique_ptr<T, void(*)(T*)> _ptr {nullptr, deleter};
+    std::unique_ptr<T, void (*)(T*)> _ptr{nullptr, deleter};
 };
 
 } // namespace sdl::internal
