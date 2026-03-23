@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://www.schemastore.org/clang-tidy.json
+---
+UseColor: true
+Checks:
+  - bugprone-*
+  - cert-*
+  - clang-analyzer-*
+  - concurrency-*
+  - cppcoreguidelines-*
+  - hicpp-*
+  - misc-*
+  - modernize-*
+  - performance-*
+  - portability-*
+  - readability-*
+  - -clang-diagnostic-pragma-once-outside-header
+  - -cppcoreguidelines-avoid-magic-numbers
+  - -cppcoreguidelines-pro-type-vararg
+  - -hicpp-deprecated-headers
+  - -hicpp-vararg
+  - -modernize-deprecated-headers
+  - -modernize-use-trailing-return-type
+  - -portability-avoid-pragma-once
+  - -readability-identifier-length
+  - -readability-magic-numbers
+CheckOptions:
+  cppcoreguidelines-avoid-non-const-global-variables.AllowInternalLinkage: true
+  misc-include-cleaner.IgnoreHeaders: 'SDL3/SDL\.h;SDL3/SDL_.*\.h'
+  readability-identifier-naming.ClassCase: CamelCase
+  readability-identifier-naming.FunctionCase: camelBack
+  readability-identifier-naming.GlobalVariablePrefix: _
+  readability-identifier-naming.MemberCase: camelBack
+  readability-identifier-naming.PrivateMemberPrefix: _
+  readability-identifier-naming.ProtectedMemberPrefix: _
+  readability-identifier-naming.VariableCase: camelBack

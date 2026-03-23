@@ -1,0 +1,23 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  - repo: local
+    hooks:
+      - id: buildifier
+        name: buildifier
+        language: system
+        entry: bazel run --run_in_cwd -- //dev:buildifier
+        types_or: [bazel]
+
+      - id: clang-format
+        name: clang-format
+        language: system
+        entry: bazel run -- @llvm//:bin/clang-format -i
+        types_or: [c++]
+
+      - id: clang-tidy
+        name: clang-tidy
+        language: system
+        entry: bazel run -- //dev:clang_tidy
+        types_or: [c++]
+        pass_filenames: false

@@ -7,3 +7,6 @@ build --copt=-Wall --copt=-Wextra --copt=-Wpedantic
 build --copt=-fdiagnostics-color
 
 build:release --compilation_mode=opt
+
+build --disk_cache=~/.cache/bazel-disk-cache
+build --experimental_disk_cache_gc_max_size=10G

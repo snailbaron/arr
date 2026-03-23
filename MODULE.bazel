@@ -3,9 +3,13 @@ module(name = "arr")
 bazel_dep(name = "rules_cc", version = "0.2.17")
 bazel_dep(name = "rules_foreign_cc", version = "0.14.0")
 
-bazel_dep(name = "snailbaron-compilation-database", version = "0.0.2", dev_dependency = True)
+bazel_dep(name = "bazel_env.bzl", version = "0.7.2", dev_dependency = True)
+bazel_dep(name = "bazel_skylib", version = "1.9.0", dev_dependency = True)
+bazel_dep(name = "snailbaron-compilation-database", version = "0.0.5", dev_dependency = True)
 
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 
 http_archive(
     name = "sdl",
@@ -33,4 +37,34 @@ filegroup(
     sha256 = "2ceb75eab4235c2c7e93dafc3ef3268ad368ca5de40892bf8cffdd510f29d9d8",
     strip_prefix = "SDL3_image-3.4.0",
     url = "https://github.com/libsdl-org/SDL_image/releases/download/release-3.4.0/SDL3_image-3.4.0.tar.gz",
+)
+
+http_archive(
+    name = "llvm",
+    build_file_content = """\
+exports_files(glob(["bin/*"]))
+
+filegroup(
+    name = "files",
+    srcs = glob(["**"]),
+    visibility = ["//visibility:public"],
+)
+""",
+    sha256 = "efc4d945744f951df00ec72c5b31da5d5a2eaf1d53cc7c9d0644f93f0f9e817d",
+    strip_prefix = "LLVM-22.1.1-Linux-X64",
+    url = "https://github.com/llvm/llvm-project/releases/download/llvmorg-22.1.1/LLVM-22.1.1-Linux-X64.tar.xz",
+)
+
+http_file(
+    name = "buildifier",
+    executable = True,
+    sha256 = "887377fc64d23a850f4d18a077b5db05b19913f4b99b270d193f3c7334b5a9a7",
+    url = "https://github.com/bazelbuild/buildtools/releases/download/v8.5.1/buildifier-linux-amd64",
+)
+
+http_file(
+    name = "pre_commit",
+    executable = True,
+    sha256 = "19d00ba35cbf9c04dc3736cd8bb641e8633f3eddd4cedde71809574ae68a2cd1",
+    url = "https://github.com/pre-commit/pre-commit/releases/download/v4.5.1/pre-commit-4.5.1.pyz",
 )
