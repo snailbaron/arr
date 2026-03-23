@@ -10,7 +10,7 @@ namespace err {
 
 class Error : public std::exception {
 public:
-    constexpr Error(
+    constexpr explicit Error(
         std::string_view message,
         std::source_location sl = std::source_location::current())
         : _message(

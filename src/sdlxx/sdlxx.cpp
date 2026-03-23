@@ -1,7 +1,9 @@
 #include "sdlxx.hpp"
 
 #include "err.hpp"
+#include "holder.hpp"
 
+#include <cstdint>
 #include <mutex>
 #include <source_location>
 
@@ -33,7 +35,7 @@ T* check(T* ptr, std::source_location sl = std::source_location::current())
 
 Init::Init(SDL_InitFlags flags)
 {
-    auto lock = std::lock_guard{_initMutex};
+    auto lock = std::scoped_lock{_initMutex};
     if (_initialized) {
         throw err::Error{"sdl::Init created twice"};
     }
@@ -44,7 +46,7 @@ Init::Init(SDL_InitFlags flags)
 
 Init::~Init()
 {
-    auto lock = std::lock_guard{_initMutex};
+    auto lock = std::scoped_lock{_initMutex};
     SDL_Quit();
     _initialized = false;
 }

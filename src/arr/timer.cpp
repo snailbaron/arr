@@ -1,5 +1,6 @@
 #include "timer.hpp"
 
+#include <chrono>
 #include <thread>
 
 FrameTimer::FrameTimer(int fps)

@@ -1,12 +1,13 @@
 #pragma once
 
 #include <chrono>
+#include <cstddef>
 
 class FrameTimer {
 public:
     explicit FrameTimer(int fps);
 
-    double delta() const;
+    [[nodiscard]] double delta() const;
 
     void reset();
     int operator()();
