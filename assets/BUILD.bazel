@@ -1,0 +1,11 @@
+load("pack_aseprite.bzl", "pack_aseprite")
+
+aseprite_files = glob(["**/*.aseprite"])
+
+pack_aseprite(
+    name = "sheet",
+    srcs = aseprite_files,
+    out_data = "sheet.json",
+    out_sheet = "sheet.png",
+    visibility = ["//:__subpackages__"],
+)

@@ -1,0 +1,16 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//src/parse-sheet-data:parse_sheet_data.bzl", "parse_sheet_data")
+
+parse_sheet_data(
+    name = "parse_sheet_data",
+    src = "//assets:sheet.json",
+    out = "assets.hpp",
+)
+
+cc_library(
+    name = "assets",
+    hdrs = ["assets.hpp"],
+    includes = ["."],
+    textual_hdrs = ["//assets:sheet.png"],
+    visibility = ["//:__subpackages__"],
+)

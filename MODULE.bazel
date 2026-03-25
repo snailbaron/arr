@@ -11,6 +11,10 @@ bazel_dep(name = "snailbaron-compilation-database", version = "0.0.5", dev_depen
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk")
 go_sdk.download(version = "1.25.8")
 
+aseprite = use_repo_rule("//assets:aseprite.bzl", "aseprite")
+
+aseprite(name = "aseprite")
+
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_file = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
