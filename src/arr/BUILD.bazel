@@ -3,9 +3,12 @@ load("@rules_cc//cc:defs.bzl", "cc_binary")
 cc_binary(
     name = "arr",
     srcs = [
+        "geometry.hpp",
         "main.cpp",
         "timer.cpp",
         "timer.hpp",
+        "ui.cpp",
+        "ui.hpp",
     ],
     copts = ["-Werror"],
     visibility = ["//visibility:public"],

@@ -1,13 +1,17 @@
 #include "timer.hpp"
 
+#include "ui.hpp"
+
 #include "sdlxx.hpp"
 
 int main()
 {
     auto init = sdl::Init{SDL_INIT_AUDIO | SDL_INIT_VIDEO};
 
-    auto window = sdl::Window{"ARR", 1024, 768, 0};
+    auto window = sdl::Window{"ARR", 1024, 768, SDL_WINDOW_FULLSCREEN};
     auto renderer = sdl::Renderer{window};
+
+    auto ui = UI{};
 
     auto timer = FrameTimer{60};
     for (;;) {
@@ -28,7 +32,11 @@ int main()
 
             renderer.drawColor(200, 200, 200);
             renderer.clear();
+
+            ui.present(renderer);
+
             renderer.present();
+
         }
 
         timer.relax();

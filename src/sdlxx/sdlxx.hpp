@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <limits>
+#include <span>
 
 namespace sdl {
 
@@ -37,6 +38,11 @@ public:
         uint8_t b,
         uint8_t a = std::numeric_limits<uint8_t>::max());
     void clear();
+
+    void renderRect(const SDL_FRect& rect);
+    void renderRects(std::span<const SDL_FRect> rects);
+    void fillRect(const SDL_FRect& rect);
+    void fillRects(std::span<const SDL_FRect> rects);
 };
 
 } // namespace sdl

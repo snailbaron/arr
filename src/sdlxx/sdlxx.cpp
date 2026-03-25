@@ -74,4 +74,24 @@ void Renderer::clear()
     check(SDL_RenderClear(ptr()));
 }
 
+void Renderer::renderRect(const SDL_FRect& rect)
+{
+    check(SDL_RenderRect(ptr(), &rect));
+}
+
+void Renderer::renderRects(std::span<const SDL_FRect> rects)
+{
+    check(SDL_RenderRects(ptr(), rects.data(), (int)rects.size()));
+}
+
+void Renderer::fillRect(const SDL_FRect& rect)
+{
+    check(SDL_RenderFillRect(ptr(), &rect));
+}
+
+void Renderer::fillRects(std::span<const SDL_FRect> rects)
+{
+    check(SDL_RenderFillRects(ptr(), rects.data(), (int)rects.size()));
+}
+
 } // namespace sdl
