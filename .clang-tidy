@@ -25,6 +25,8 @@ Checks:
   - -readability-magic-numbers
 CheckOptions:
   cppcoreguidelines-avoid-non-const-global-variables.AllowInternalLinkage: true
+  cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor: true
+  hicpp-special-member-functions.AllowSoleDefaultDtor: true
   misc-include-cleaner.IgnoreHeaders: 'SDL3/SDL\.h;SDL3/SDL_.*\.h'
   readability-identifier-naming.ClassCase: CamelCase
   readability-identifier-naming.FunctionCase: camelBack
