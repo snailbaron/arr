@@ -3,6 +3,8 @@
 #include "err.hpp"
 #include "holder.hpp"
 
+#include <SDL3_image/SDL_image.h>
+
 #include <cstdint>
 #include <mutex>
 #include <source_location>
@@ -51,6 +53,30 @@ Init::~Init()
     _initialized = false;
 }
 
+IOStream::IOStream(std::span<const std::byte> mem)
+{
+    _ptr.reset(check(SDL_IOFromConstMem(mem.data(), mem.size())));
+}
+
+constexpr const SDL_IOStream* IOStream::ptr() const noexcept
+{
+    return _ptr.get();
+}
+
+constexpr SDL_IOStream* IOStream::ptr() noexcept
+{
+    return _ptr.get();
+}
+
+void IOStream::close()
+{
+    check(SDL_CloseIO(_ptr.release()));
+}
+
+Texture::Texture(SDL_Texture* ptr)
+    : Holder{ptr}
+{ }
+
 Window::Window(const char* title, int w, int h, SDL_WindowFlags flags)
     : Holder{check(SDL_CreateWindow(title, w, h, flags))}
 { }
@@ -92,6 +118,25 @@ void Renderer::fillRect(const SDL_FRect& rect)
 void Renderer::fillRects(std::span<const SDL_FRect> rects)
 {
     check(SDL_RenderFillRects(ptr(), rects.data(), (int)rects.size()));
+}
+
+Texture Renderer::loadTexture(const std::filesystem::path& file)
+{
+    return Texture{check(IMG_LoadTexture(ptr(), file.string().c_str()))};
+}
+
+Texture Renderer::loadTexture(std::span<const std::byte> mem)
+{
+    auto io = IOStream{mem};
+    auto texture = Texture{check(IMG_LoadTexture_IO(ptr(), io.ptr(), false))};
+    io.close();
+    return texture;
+}
+
+void Renderer::render(
+    Texture& texture, const SDL_FRect& srcrect, const SDL_FRect& dstrect)
+{
+    check(SDL_RenderTexture(ptr(), texture.ptr(), &srcrect, &dstrect));
 }
 
 } // namespace sdl

@@ -12,6 +12,7 @@ cc_library(
     visibility = ["//:__subpackages__"],
     deps = [
         "//deps:sdl",
+        "//deps:sdl_image",
         "//src/err",
     ],
 )

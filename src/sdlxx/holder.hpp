@@ -1,10 +1,12 @@
 #pragma once
 
 #include <memory>
+#include <utility>
 
 namespace sdl::internal {
 
 template <class T, void (*deleter)(T*)>
+requires requires { noexcept(deleter(std::declval<T*>())); }
 class Holder {
 public:
     constexpr explicit Holder(T* ptr) noexcept

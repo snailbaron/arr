@@ -5,6 +5,7 @@
 #include <SDL3/SDL.h>
 
 #include <cstdint>
+#include <filesystem>
 #include <limits>
 #include <span>
 
@@ -19,6 +20,25 @@ public:
     Init(Init&&) noexcept = delete;
     Init& operator=(const Init&) = delete;
     Init& operator=(Init&&) noexcept = delete;
+};
+
+class IOStream {
+public:
+    explicit IOStream(std::span<const std::byte> mem);
+
+    [[nodiscard]] constexpr const SDL_IOStream* ptr() const noexcept;
+    [[nodiscard]] constexpr SDL_IOStream* ptr() noexcept;
+
+    void close();
+
+private:
+    std::unique_ptr<SDL_IOStream, bool (*)(SDL_IOStream*)> _ptr{
+        nullptr, SDL_CloseIO};
+};
+
+class Texture : public internal::Holder<SDL_Texture, SDL_DestroyTexture> {
+public:
+    explicit Texture(SDL_Texture* ptr);
 };
 
 class Window : public internal::Holder<SDL_Window, SDL_DestroyWindow> {
@@ -43,6 +63,12 @@ public:
     void renderRects(std::span<const SDL_FRect> rects);
     void fillRect(const SDL_FRect& rect);
     void fillRects(std::span<const SDL_FRect> rects);
+
+    [[nodiscard]] Texture loadTexture(const std::filesystem::path& file);
+    [[nodiscard]] Texture loadTexture(std::span<const std::byte> mem);
+
+    void render(
+        Texture& texture, const SDL_FRect& srcrect, const SDL_FRect& dstrect);
 };
 
 } // namespace sdl
