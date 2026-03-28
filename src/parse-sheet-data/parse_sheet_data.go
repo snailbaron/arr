@@ -115,7 +115,7 @@ struct ButtonSprite {
     ButtonAnimations animations;
 };
 
-constinit unsigned char sheet[]{
+constinit const unsigned char sheet[]{
 #embed <assets/sheet.png>
 };
 
