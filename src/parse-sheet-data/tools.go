@@ -1,9 +1,13 @@
 package main
 
 import (
+	"cmp"
 	"fmt"
 	"io"
+	"iter"
+	"maps"
 	"os"
+	"slices"
 	"unicode"
 )
 
@@ -15,6 +19,30 @@ func insertAt[S ~[]E, E any](s S, i int, value E) []E {
 	}
 	s[i] = value
 	return s
+}
+
+func inOrder[Map ~map[K]V, K cmp.Ordered, V any](m Map) iter.Seq2[K, V] {
+	return func(yield func(K, V) bool) {
+		for _, k := range slices.Sorted(maps.Keys(m)) {
+			if !yield(k, m[k]) {
+				return
+			}
+		}
+	}
+}
+
+func elementSet[E comparable](s []E) map[E]int {
+	m := make(map[E]int)
+	for _, e := range s {
+		m[e]++
+	}
+	return m
+}
+
+func sameElements[E comparable](s1, s2 []E) bool {
+	m1 := elementSet(s1)
+	m2 := elementSet(s2)
+	return maps.Equal(m1, m2)
 }
 
 func kebabToCamel(s string) string {

@@ -6,4 +6,5 @@ go_binary(
         "parse_sheet_data.go",
         "tools.go",
     ],
+    deps = ["//src/parse-sheet-data/aseprite"],
 )

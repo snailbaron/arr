@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -11,59 +10,30 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+
+	"aseprite"
 )
 
-type spriteSize struct {
-	W int `json:"w"`
-	H int `json:"h"`
+type frameRange struct {
+	begin int
+	size  int
 }
 
-func (ss spriteSize) String() string {
-	return fmt.Sprintf("%dx%d", ss.W, ss.H)
+type sprite struct {
+	size       aseprite.Size
+	animations map[string]frameRange
 }
 
-type frame struct {
-	X int `json:"x"`
-	Y int `json:"y"`
-	W int `json:"w"`
-	H int `json:"h"`
+type spriteData struct {
+	frames  []aseprite.Frame
+	sprites map[string]sprite
 }
 
-func (f frame) String() string {
-	return fmt.Sprintf("{x=%d y=%d w=%d h=%d}", f.X, f.Y, f.W, f.H)
-}
+var buttonSpriteAnimationNames = []string{"neutral", "focused", "pressed", "left"}
 
-type sheetFrameInfo struct {
-	Filename         string     `json:"filename"`
-	Frame            frame      `json:"frame"`
-	Rotated          bool       `json:"rotated"`
-	Trimmed          bool       `json:"trimmed"`
-	SpriteSourceSize frame      `json:"spriteSourceSize"`
-	SourceSize       spriteSize `json:"sourceSize"`
-	Duration         int        `json:"duration"`
-}
-
-type sheet struct {
-	Frames []sheetFrameInfo `json:"frames"`
-}
-
-func decodeSheet(input io.Reader) (*sheet, error) {
-	decoder := json.NewDecoder(input)
-
-	var sh sheet
-	if err := decoder.Decode(&sh); err != nil {
-		return nil, fmt.Errorf("failed to decode input JSON: %w", err)
-	}
-	return &sh, nil
-}
-
-type preparedSprite struct {
-	size       spriteSize
-	animations map[string][]frame
-}
-
-func prepareSheet(sh *sheet) (map[string]preparedSprite, error) {
-	sprites := make(map[string]preparedSprite)
+func prepareSpriteData(sh *aseprite.Sheet) (*spriteData, error) {
+	spriteSizes := make(map[string]aseprite.Size)
+	frames := make(map[string]map[string][]aseprite.Frame)
 
 	for _, f := range sh.Frames {
 		filenameFields := strings.Split(f.Filename, ":")
@@ -82,23 +52,36 @@ func prepareSheet(sh *sheet) (map[string]preparedSprite, error) {
 				f.Filename, filenameFields[2])
 		}
 
-		if _, ok := sprites[spriteName]; !ok {
-			sprites[spriteName] = preparedSprite{
-				size:       f.SourceSize,
-				animations: make(map[string][]frame),
-			}
+		if _, ok := frames[spriteName]; !ok {
+			frames[spriteName] = make(map[string][]aseprite.Frame)
 		}
-
-		sprites[spriteName].animations[animationName] = insertAt(
-			sprites[spriteName].animations[animationName],
+		spriteSizes[spriteName] = f.SourceSize
+		frames[spriteName][animationName] = insertAt(
+			frames[spriteName][animationName],
 			frameIndex,
 			f.Frame)
 	}
 
-	return sprites, nil
+	spriteData := spriteData{sprites: make(map[string]sprite)}
+
+	for spriteName, spriteFrames := range frames {
+		spriteData.sprites[spriteName] = sprite{
+			size:       spriteSizes[spriteName],
+			animations: make(map[string]frameRange),
+		}
+
+		for animationName, animationFrames := range spriteFrames {
+			spriteData.sprites[spriteName].animations[animationName] = frameRange{
+				begin: len(spriteData.frames), size: len(animationFrames),
+			}
+			spriteData.frames = append(spriteData.frames, animationFrames...)
+		}
+	}
+
+	return &spriteData, nil
 }
 
-func generateHeader(sprites map[string]preparedSprite, output io.Writer) error {
+func generateHeader(sd *spriteData, output io.Writer) error {
 	p := NewErrPrinter(output)
 
 	p.Print(`#pragma once
@@ -107,10 +90,6 @@ func generateHeader(sprites map[string]preparedSprite, output io.Writer) error {
 #include <span>
 
 namespace assets {
-
-constinit unsigned char sheet[]{
-#embed <assets/sheet.png>
-};
 
 struct Frame {
     int x = 0;
@@ -125,10 +104,10 @@ struct Size {
 };
 
 struct ButtonAnimations {
-    std::span<Frame> neutral;
-    std::span<Frame> focused;
-    std::span<Frame> pressed;
-    std::span<Frame> left;
+    std::span<const Frame> neutral;
+    std::span<const Frame> focused;
+    std::span<const Frame> pressed;
+    std::span<const Frame> left;
 };
 
 struct ButtonSprite {
@@ -136,60 +115,53 @@ struct ButtonSprite {
     ButtonAnimations animations;
 };
 
-namespace sprites {
+constinit unsigned char sheet[]{
+#embed <assets/sheet.png>
+};
 
 `)
 
-	var allFrames []frame
+	p.Println("constinit auto frames = std::array{")
+	for _, f := range sd.frames {
+		p.Printf("    Frame{.x = %d, .y = %d, .w = %d, .h = %d},\n",
+			f.X, f.Y, f.W, f.H)
+	}
+	p.Println("};")
+	p.Println("")
 
-	spriteNames := slices.Sorted(maps.Keys(sprites))
-	for _, spriteName := range spriteNames {
-		sprite := sprites[spriteName]
+	p.Println("namespace sprites {")
+	p.Println("")
 
-		spriteAnimationNames := slices.Sorted(maps.Keys(sprite.animations))
-		isButtonSprite := slices.Equal(spriteAnimationNames,
-			[]string{"focused", "left", "neutral", "pressed"})
-		if !isButtonSprite {
-			return fmt.Errorf(
-				"only button sprites are supported now, got one with animations %v",
-				spriteAnimationNames)
-		}
+	for spriteName, spr := range inOrder(sd.sprites) {
 		p.Printf("constinit ButtonSprite %s{\n", kebabToCamel(spriteName))
-		p.Println("    .animations{")
-		for _, spriteAnimationName := range []string{
-			"neutral", "focused", "pressed", "left"} {
+		p.Printf("    .size = Size{.w = %d, .h = %d},\n", spr.size.W, spr.size.H)
+		p.Printf("    .animations{\n")
 
-			animationFrames := sprite.animations[spriteAnimationName]
+		if !sameElements(
+			slices.Collect(maps.Keys(spr.animations)),
+			buttonSpriteAnimationNames) {
 
-			framesBegin := len(allFrames)
-			allFrames = append(allFrames, animationFrames...)
-
-			p.Printf("        .%s{\n", spriteAnimationName)
-			p.Printf("            std::span<Frame>(frames.data() + %d, %d\n",
-				framesBegin, len(animationFrames))
-			p.Println("        },")
+			return fmt.Errorf(
+				"only button sprites are supported (animations %v)",
+				buttonSpriteAnimationNames)
 		}
-		p.Println("    },")
-		p.Println("};")
+
+		for _, animationName := range buttonSpriteAnimationNames {
+			animationFrames := spr.animations[animationName]
+			p.Printf("        .%s = std::span<const Frame>(frames.data() + %d, %d),\n",
+				kebabToCamel(animationName),
+				animationFrames.begin,
+				animationFrames.size)
+		}
+		p.Printf("    },\n")
+		p.Printf("};\n")
 	}
 
 	p.Println("")
 	p.Println("} // namespace sprites")
 	p.Println("")
-
-	p.Println("constinit auto frames = std::array{")
-	for _, f := range allFrames {
-		p.Printf("    Frame{.x = %d, .y = %d, .w = %d, .h = %d},\n",
-			f.X, f.Y, f.W, f.H)
-	}
-	p.Println("};")
-
-	p.Println("")
 	p.Println("} // namespace assets")
 
-	if err := p.Err(); err != nil {
-		return fmt.Errorf("failed to generate header: %w", err)
-	}
 	return nil
 }
 
@@ -212,15 +184,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	sh, err := decodeSheet(input)
+	sh, err := aseprite.DecodeAsepriteSheet(input)
 	if err != nil {
 		log.Fatalf("cannot decode sheet: %v", err)
 	}
 
-	sprites, err := prepareSheet(sh)
+	sd, err := prepareSpriteData(sh)
 	if err != nil {
 		log.Fatalf("cannot prepare sheet: %v", err)
 	}
 
-	generateHeader(sprites, output)
+	generateHeader(sd, output)
 }
