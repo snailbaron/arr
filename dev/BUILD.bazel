@@ -26,6 +26,7 @@ bazel_env(
         "buildifier": ":buildifier",
         "clang-format": "@llvm//:bin/clang-format",
         "clang-tidy": "@llvm//:bin/clang-tidy",
+        "go": "@rules_go//go",
         "pre-commit": "@pre_commit//file",
         "run-clang-tidy": "@llvm//:bin/run-clang-tidy",
     },
