@@ -1,0 +1,11 @@
+load("@rules_go//go:def.bzl", "go_library")
+
+go_library(
+    name = "moreio",
+    srcs = [
+        "err_printer.go",
+        "optional_io.go",
+    ],
+    importpath = "gogo/moreio",
+    visibility = ["//:__subpackages__"],
+)

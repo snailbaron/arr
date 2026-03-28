@@ -12,6 +12,8 @@ import (
 	"strings"
 
 	"aseprite"
+	"gogo/moreio"
+	"gogo/xs"
 )
 
 type frameRange struct {
@@ -56,7 +58,7 @@ func prepareSpriteData(sh *aseprite.Sheet) (*spriteData, error) {
 			frames[spriteName] = make(map[string][]aseprite.Frame)
 		}
 		spriteSizes[spriteName] = f.SourceSize
-		frames[spriteName][animationName] = insertAt(
+		frames[spriteName][animationName] = xs.InsertAt(
 			frames[spriteName][animationName],
 			frameIndex,
 			f.Frame)
@@ -82,7 +84,7 @@ func prepareSpriteData(sh *aseprite.Sheet) (*spriteData, error) {
 }
 
 func generateHeader(sd *spriteData, output io.Writer) error {
-	p := NewErrPrinter(output)
+	p := moreio.NewErrPrinter(output)
 
 	p.Print(`#pragma once
 
@@ -132,12 +134,12 @@ constinit const unsigned char sheet[]{
 	p.Println("namespace sprites {")
 	p.Println("")
 
-	for spriteName, spr := range inOrder(sd.sprites) {
+	for spriteName, spr := range xs.InOrder(sd.sprites) {
 		p.Printf("constinit ButtonSprite %s{\n", kebabToCamel(spriteName))
 		p.Printf("    .size = Size{.w = %d, .h = %d},\n", spr.size.W, spr.size.H)
 		p.Printf("    .animations{\n")
 
-		if !sameElements(
+		if !xs.SameElements(
 			slices.Collect(maps.Keys(spr.animations)),
 			buttonSpriteAnimationNames) {
 
@@ -175,11 +177,11 @@ func main() {
 		os.Exit(2)
 	}
 
-	input, err := optionalInputFile(*inputPath)
+	input, err := moreio.OptionalInputFile(*inputPath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	output, err := optionalOutputFile(*outputPath)
+	output, err := moreio.OptionalOutputFile(*outputPath)
 	if err != nil {
 		log.Fatal(err)
 	}
