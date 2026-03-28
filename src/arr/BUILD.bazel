@@ -10,7 +10,13 @@ cc_binary(
         "ui.cpp",
         "ui.hpp",
     ],
-    copts = ["-Werror"],
+    copts = [
+        "-Werror",
+        "--embed-dir=$(BINDIR)",
+    ],
     visibility = ["//visibility:public"],
-    deps = ["//src/sdlxx"],
+    deps = [
+        "//src/assets",
+        "//src/sdlxx",
+    ],
 )
