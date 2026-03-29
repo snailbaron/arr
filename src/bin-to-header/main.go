@@ -10,37 +10,32 @@ import (
 	"gogo/moreio"
 )
 
-func binToHeader(in io.Reader, out io.Writer, namespace string) error {
+func binToHeader(in io.Reader, out io.Writer) error {
 	w := bufio.NewWriter(out)
 	p := moreio.NewErrPrinter(w)
 
-	p.Printf(`#pragma once
+	p.Print(`#pragma once
 
 #include <array>
 #include <cstddef>
+#include <span>
 
-namespace %s {
-
-namespace literals {
+namespace internal {
 
 consteval std::byte operator""_b(unsigned long long b)
 {
     return std::byte{static_cast<unsigned char>(b)};
 }
 
-} // namespace literals
-
-using namespace literals;
-
-constinit const auto bytes = std::array{
-`, namespace)
+constinit const auto zeroTerminatedBytes = std::array{
+`)
 
 	scanner := bufio.NewScanner(in)
 	scanner.Split(bufio.ScanBytes)
 	lineLength := 3
 	p.Print("   ")
-	for scanner.Scan() {
-		b := scanner.Bytes()[0]
+
+	addByte := func(b byte) {
 		s := fmt.Sprintf(" 0x%02x_b,", b)
 		if lineLength+len(s) > 80 {
 			p.Printf("\n   ")
@@ -49,10 +44,23 @@ constinit const auto bytes = std::array{
 		lineLength += len(s)
 		p.Print(s)
 	}
-	p.Printf(`
+
+	for scanner.Scan() {
+		b := scanner.Bytes()[0]
+		addByte(b)
+	}
+	addByte(0)
+	p.Print(`
 };
 
-} // namespace %s`, namespace)
+} // namespace internal
+
+using namespace internal;
+
+constinit const auto bytes = std::span<const std::byte>(
+    internal::zeroTerminatedBytes.data(),
+    internal::zeroTerminatedBytes.size() - 1);
+`)
 
 	if err := scanner.Err(); err != nil {
 		return fmt.Errorf("failed to read input: %w", err)
@@ -70,7 +78,6 @@ constinit const auto bytes = std::array{
 func main() {
 	inputPath := flag.String("input", "-", "input binary file to encode")
 	outputPath := flag.String("output", "-", "header to generate")
-	namespace := flag.String("namespace", "data", "namespace name")
 	flag.Parse()
 
 	in, err := moreio.OptionalInputFile(*inputPath)
@@ -82,7 +89,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := binToHeader(in, out, *namespace); err != nil {
+	if err := binToHeader(in, out); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -1,0 +1,33 @@
+load("@rules_cc//cc:defs.bzl", "cc_test")
+load("//src/bin-to-header:def.bzl", "bin_to_header")
+
+bin_to_header(
+    name = "header.0",
+    src = "data.0",
+)
+
+bin_to_header(
+    name = "header.1",
+    src = "data.1",
+)
+
+bin_to_header(
+    name = "header.100",
+    src = "data.100",
+)
+
+cc_test(
+    name = "test-bin-to-header",
+    srcs = [
+        "main.cpp",
+        ":header.0",
+        ":header.1",
+        ":header.100",
+    ],
+    data = [
+        "data.0",
+        "data.1",
+        "data.100",
+    ],
+    deps = ["@catch2//:catch2_main"],
+)

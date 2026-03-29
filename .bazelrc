@@ -5,6 +5,7 @@ build --compilation_mode=dbg
 build --cxxopt=-std=c++26
 build --copt=-Wall --copt=-Wextra --copt=-Wpedantic
 build --copt=-fdiagnostics-color
+test --test_output=errors
 
 build:release --compilation_mode=opt
 
