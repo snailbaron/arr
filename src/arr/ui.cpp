@@ -48,9 +48,9 @@ void Button::present(sdl::Renderer& rr, const ScreenVector& offset) const
     rr.drawColor(_color.r, _color.g, _color.b, _color.a);
     rr.fillRect(
         SDL_FRect{
-            .x=_origin.x + offset.x,
-            .y=_origin.y + offset.y,
-            .w=_size.x,
-            .h=_size.y,
+            .x = _origin.x + offset.x,
+            .y = _origin.y + offset.y,
+            .w = _size.x,
+            .h = _size.y,
         });
 }

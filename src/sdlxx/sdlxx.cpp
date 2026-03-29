@@ -120,7 +120,8 @@ void Renderer::fillRect(const SDL_FRect& rect)
 
 void Renderer::fillRects(std::span<const SDL_FRect> rects)
 {
-    check(SDL_RenderFillRects(ptr(), rects.data(), static_cast<int>(rects.size())));
+    check(SDL_RenderFillRects(
+        ptr(), rects.data(), static_cast<int>(rects.size())));
 }
 
 Texture Renderer::loadTexture(const std::filesystem::path& file)

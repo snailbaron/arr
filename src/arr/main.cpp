@@ -5,7 +5,6 @@
 #include "assets.hpp"
 #include "sdlxx.hpp"
 
-
 int main()
 {
     auto init = sdl::Init{SDL_INIT_AUDIO | SDL_INIT_VIDEO};
@@ -41,8 +40,8 @@ int main()
 
             renderer.render(
                 sheetTexture,
-                SDL_FRect{.x=0, .y=0, .w=32, .h=32},
-                SDL_FRect{.x=10, .y=10, .w=32, .h=32});
+                SDL_FRect{.x = 0, .y = 0, .w = 32, .h = 32},
+                SDL_FRect{.x = 10, .y = 10, .w = 32, .h = 32});
 
             renderer.present();
         }
