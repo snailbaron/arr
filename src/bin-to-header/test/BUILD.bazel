@@ -18,6 +18,7 @@ bin_to_header(
 
 cc_test(
     name = "test-bin-to-header",
+    size = "small",
     srcs = [
         "main.cpp",
         ":header.0",
