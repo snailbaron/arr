@@ -27,7 +27,7 @@ consteval std::byte operator""_b(unsigned long long b)
     return std::byte{static_cast<unsigned char>(b)};
 }
 
-constinit const auto zeroTerminatedBytes = std::array{
+constinit inline const auto zeroTerminatedBytes = std::array{
 `)
 
 	scanner := bufio.NewScanner(in)
@@ -57,7 +57,7 @@ constinit const auto zeroTerminatedBytes = std::array{
 
 using namespace internal;
 
-constinit const auto bytes = std::span<const std::byte>(
+constinit inline const auto bytes = std::span<const std::byte>(
     internal::zeroTerminatedBytes.data(),
     internal::zeroTerminatedBytes.size() - 1);
 `)

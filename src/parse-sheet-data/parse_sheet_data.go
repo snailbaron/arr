@@ -91,6 +91,12 @@ func generateHeader(sd *spriteData, output io.Writer) error {
 #include <array>
 #include <span>
 
+namespace internal {
+
+#include "src/assets/sheet.hpp"
+
+} // namespace internal
+
 namespace assets {
 
 struct Frame {
@@ -117,13 +123,11 @@ struct ButtonSprite {
     ButtonAnimations animations;
 };
 
-constinit const unsigned char sheet[]{
-#embed <assets/sheet.png>
-};
+constinit inline const auto& sheet = internal::bytes;
 
 `)
 
-	p.Println("constinit auto frames = std::array{")
+	p.Println("constinit inline const auto frames = std::array{")
 	for _, f := range sd.frames {
 		p.Printf("    Frame{.x = %d, .y = %d, .w = %d, .h = %d},\n",
 			f.X, f.Y, f.W, f.H)
@@ -135,7 +139,7 @@ constinit const unsigned char sheet[]{
 	p.Println("")
 
 	for spriteName, spr := range xs.InOrder(sd.sprites) {
-		p.Printf("constinit ButtonSprite %s{\n", kebabToCamel(spriteName))
+		p.Printf("constinit inline const ButtonSprite %s{\n", kebabToCamel(spriteName))
 		p.Printf("    .size = Size{.w = %d, .h = %d},\n", spr.size.W, spr.size.H)
 		p.Printf("    .animations{\n")
 
