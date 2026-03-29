@@ -7,7 +7,10 @@ concept Scalar = std::integral<T> || std::floating_point<T>;
 
 template <Scalar T, class Domain>
 struct Vector {
-    static constexpr Vector zero{};
+    static constexpr Vector zero()
+    {
+        return Vector{};
+    }
 
     constexpr Vector& operator+=(const Vector& other)
     {
@@ -37,8 +40,8 @@ struct Vector {
         return *this;
     }
 
-    T x;
-    T y;
+    T x = 0;
+    T y = 0;
 
 private:
     friend constexpr auto operator<=>(const Vector&, const Vector&) noexcept =
@@ -104,8 +107,8 @@ struct Point {
         return *this;
     }
 
-    T x;
-    T y;
+    T x = 0;
+    T y = 0;
 
 private:
     friend constexpr auto operator<=>(const Point&, const Point&) = default;

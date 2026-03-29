@@ -5,6 +5,7 @@
 #include "sdlxx.hpp"
 
 #include <concepts>
+#include <cstdint>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -18,7 +19,7 @@ class Widget {
 public:
     virtual ~Widget() = default;
 
-    virtual void update(double) { }
+    virtual void update(double /*unused*/) { }
 
     virtual void present(
         sdl::Renderer& rr, const ScreenVector& offset) const = 0;
@@ -44,13 +45,14 @@ private:
 class Button : public Widget {
 public:
     void origin(float x, float y);
-    void size(float w, float h);
+    void width(float w);
+    void height(float h);
     void color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255);
 
     void present(sdl::Renderer& rr, const ScreenVector& offset) const override;
 
 private:
-    ScreenPoint _origin;
-    ScreenVector _size;
-    SDL_Color _color;
+    ScreenPoint _origin{};
+    ScreenVector _size{};
+    SDL_Color _color{};
 };

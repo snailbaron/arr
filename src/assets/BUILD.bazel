@@ -1,5 +1,12 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
+load("//src/bin-to-header:def.bzl", "bin_to_header")
 load("//src/parse-sheet-data:parse_sheet_data.bzl", "parse_sheet_data")
+
+bin_to_header(
+    name = "sheet_header",
+    src = "//assets:sheet.png",
+    out = "sheet.hpp",
+)
 
 parse_sheet_data(
     name = "parse_sheet_data",
@@ -9,6 +16,7 @@ parse_sheet_data(
 
 cc_library(
     name = "assets",
+    srcs = ["sheet.hpp"],
     hdrs = ["assets.hpp"],
     includes = ["."],
     textual_hdrs = ["//assets:sheet.png"],

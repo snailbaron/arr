@@ -5,7 +5,6 @@
 #include "assets.hpp"
 #include "sdlxx.hpp"
 
-#include <iostream>
 
 int main()
 {
@@ -14,9 +13,7 @@ int main()
     auto window = sdl::Window{"ARR", 1024, 768, SDL_WINDOW_FULLSCREEN};
     auto renderer = sdl::Renderer{window};
 
-    auto sheetBytes =
-        std::as_bytes(std::span(assets::sheet, sizeof(assets::sheet)));
-    auto sheetTexture = renderer.loadTexture(sheetBytes);
+    auto sheetTexture = renderer.loadTexture(assets::sheet);
 
     auto ui = UI{};
 
@@ -43,7 +40,9 @@ int main()
             ui.present(renderer);
 
             renderer.render(
-                sheetTexture, SDL_FRect{0, 0, 32, 32}, SDL_FRect{10, 10, 32, 32});
+                sheetTexture,
+                SDL_FRect{.x=0, .y=0, .w=32, .h=32},
+                SDL_FRect{.x=10, .y=10, .w=32, .h=32});
 
             renderer.present();
         }

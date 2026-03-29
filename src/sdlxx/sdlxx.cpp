@@ -5,16 +5,19 @@
 
 #include <SDL3_image/SDL_image.h>
 
+#include <cstddef>
 #include <cstdint>
+#include <filesystem>
 #include <mutex>
 #include <source_location>
+#include <span>
 
 namespace sdl {
 
 namespace {
 
-std::mutex _initMutex;
-bool _initialized = false;
+std::mutex initMutex;
+bool initialized = false;
 
 void check(
     bool success, std::source_location sl = std::source_location::current())
@@ -37,20 +40,20 @@ T* check(T* ptr, std::source_location sl = std::source_location::current())
 
 Init::Init(SDL_InitFlags flags)
 {
-    auto lock = std::scoped_lock{_initMutex};
-    if (_initialized) {
+    auto lock = std::scoped_lock{initMutex};
+    if (initialized) {
         throw err::Error{"sdl::Init created twice"};
     }
 
     check(SDL_Init(flags));
-    _initialized = true;
+    initialized = true;
 }
 
 Init::~Init()
 {
-    auto lock = std::scoped_lock{_initMutex};
+    auto lock = std::scoped_lock{initMutex};
     SDL_Quit();
-    _initialized = false;
+    initialized = false;
 }
 
 IOStream::IOStream(std::span<const std::byte> mem)
@@ -107,7 +110,7 @@ void Renderer::renderRect(const SDL_FRect& rect)
 
 void Renderer::renderRects(std::span<const SDL_FRect> rects)
 {
-    check(SDL_RenderRects(ptr(), rects.data(), (int)rects.size()));
+    check(SDL_RenderRects(ptr(), rects.data(), static_cast<int>(rects.size())));
 }
 
 void Renderer::fillRect(const SDL_FRect& rect)
@@ -117,7 +120,7 @@ void Renderer::fillRect(const SDL_FRect& rect)
 
 void Renderer::fillRects(std::span<const SDL_FRect> rects)
 {
-    check(SDL_RenderFillRects(ptr(), rects.data(), (int)rects.size()));
+    check(SDL_RenderFillRects(ptr(), rects.data(), static_cast<int>(rects.size())));
 }
 
 Texture Renderer::loadTexture(const std::filesystem::path& file)

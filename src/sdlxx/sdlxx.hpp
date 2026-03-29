@@ -4,9 +4,11 @@
 
 #include <SDL3/SDL.h>
 
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <limits>
+#include <memory>
 #include <span>
 
 namespace sdl {
