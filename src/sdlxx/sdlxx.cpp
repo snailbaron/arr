@@ -76,10 +76,6 @@ void IOStream::close()
     check(SDL_CloseIO(_ptr.release()));
 }
 
-Texture::Texture(SDL_Texture* ptr)
-    : Holder{ptr}
-{ }
-
 Window::Window(const char* title, int w, int h, SDL_WindowFlags flags)
     : Holder{check(SDL_CreateWindow(title, w, h, flags))}
 { }

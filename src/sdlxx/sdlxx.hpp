@@ -40,7 +40,7 @@ private:
 
 class Texture : public internal::Holder<SDL_Texture, SDL_DestroyTexture> {
 public:
-    explicit Texture(SDL_Texture* ptr);
+    using internal::Holder<SDL_Texture, SDL_DestroyTexture>::Holder;
 };
 
 class Window : public internal::Holder<SDL_Window, SDL_DestroyWindow> {
