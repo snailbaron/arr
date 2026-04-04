@@ -1,6 +1,7 @@
 #include "timer.hpp"
 
 #include <chrono>
+#include <cmath>
 #include <thread>
 
 FrameTimer::FrameTimer(int fps)
@@ -31,4 +32,22 @@ int FrameTimer::operator()()
 void FrameTimer::relax() const
 {
     std::this_thread::sleep_until(_start + _frameDuration * (_lastFrame + 1));
+}
+
+Ticker::Ticker(int fps)
+    : _secsPerFrame(1.0 / fps)
+{ }
+
+void Ticker::tick(double delta)
+{
+    _lastFrameTime += delta;
+
+    auto full = static_cast<unsigned>(_lastFrameTime / _secsPerFrame);
+    _fullFrames += full;
+    _lastFrameTime -= full;
+}
+
+size_t Ticker::frame() const
+{
+    return _fullFrames;
 }
