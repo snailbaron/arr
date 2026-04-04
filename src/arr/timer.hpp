@@ -27,7 +27,7 @@ class Ticker {
 public:
     explicit Ticker(int fps);
     void tick(double delta);
-    size_t frame() const;
+    [[nodiscard]] size_t frame() const;
 
 private:
     double _secsPerFrame = 0.0;

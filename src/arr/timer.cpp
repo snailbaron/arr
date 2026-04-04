@@ -1,7 +1,7 @@
 #include "timer.hpp"
 
 #include <chrono>
-#include <cmath>
+#include <cstddef>
 #include <thread>
 
 FrameTimer::FrameTimer(int fps)

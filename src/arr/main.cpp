@@ -1,27 +1,36 @@
 #include "timer.hpp"
 
+#include "assets.hpp"
 #include "ui.hpp"
 
-#include "assets.hpp"
 #include "sdlxx.hpp"
 
 int main()
 {
     auto init = sdl::Init{SDL_INIT_AUDIO | SDL_INIT_VIDEO};
 
-    auto window = sdl::Window{"ARR", 1024, 768, SDL_WINDOW_FULLSCREEN};
+    auto window = sdl::Window{"ARR", 1024, 768, 0};
     auto renderer = sdl::Renderer{window};
+    assets::init(renderer);
 
-    auto sheetTexture = renderer.loadTexture(assets::sheet);
+    bool done = false;
 
     auto ui = UI{};
+    ui.emplace<Button>(assets::sprites::closeButton)
+        ->origin(100, 100)
+        ->click(
+            [&done]
+            {
+                done = true;
+            });
 
     auto timer = FrameTimer{60};
     for (;;) {
-        bool done = false;
         for (auto e = SDL_Event{}; SDL_PollEvent(&e) && !done;) {
             if (e.type == SDL_EVENT_QUIT) {
                 done = true;
+            } else {
+                ui.processEvent(e);
             }
         }
         if (done) {
@@ -37,11 +46,6 @@ int main()
             renderer.clear();
 
             ui.present(renderer);
-
-            renderer.render(
-                sheetTexture,
-                SDL_FRect{.x = 0, .y = 0, .w = 32, .h = 32},
-                SDL_FRect{.x = 10, .y = 10, .w = 32, .h = 32});
 
             renderer.present();
         }

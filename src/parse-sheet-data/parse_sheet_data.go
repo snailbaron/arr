@@ -88,8 +88,12 @@ func generateHeader(sd *spriteData, output io.Writer) error {
 
 	p.Print(`#pragma once
 
+#include "sdlxx.hpp"
+
 #include <array>
 #include <span>
+
+namespace assets {
 
 namespace internal {
 
@@ -97,39 +101,40 @@ namespace internal {
 
 } // namespace internal
 
-namespace assets {
+inline sdl::Texture sheetTexture;
 
-struct Frame {
-    int x = 0;
-    int y = 0;
-    int w = 0;
-    int h = 0;
-};
+constexpr void init(sdl::Renderer& rr)
+{
+    sheetTexture = rr.loadTexture(internal::bytes);
+}
 
 struct Size {
-    int w = 0;
-    int h = 0;
+    float w = 0.f;
+    float h = 0.f;
 };
 
 struct ButtonAnimations {
-    std::span<const Frame> neutral;
-    std::span<const Frame> focused;
-    std::span<const Frame> pressed;
-    std::span<const Frame> left;
+    std::span<const SDL_FRect> neutral;
+    std::span<const SDL_FRect> focused;
+    std::span<const SDL_FRect> pressed;
+    std::span<const SDL_FRect> left;
 };
 
 struct ButtonSprite {
-    Size size{};
+    static sdl::Texture& texture()
+    {
+        return sheetTexture;
+    }
+
+    Size size;
     ButtonAnimations animations;
 };
-
-constinit inline const auto& sheet = internal::bytes;
 
 `)
 
 	p.Println("constinit inline const auto frames = std::array{")
 	for _, f := range sd.frames {
-		p.Printf("    Frame{.x = %d, .y = %d, .w = %d, .h = %d},\n",
+		p.Printf("    SDL_FRect{.x = %d, .y = %d, .w = %d, .h = %d},\n",
 			f.X, f.Y, f.W, f.H)
 	}
 	p.Println("};")
@@ -154,7 +159,7 @@ constinit inline const auto& sheet = internal::bytes;
 
 		for _, animationName := range buttonSpriteAnimationNames {
 			animationFrames := spr.animations[animationName]
-			p.Printf("        .%s = std::span<const Frame>(frames.data() + %d, %d),\n",
+			p.Printf("        .%s = std::span<const SDL_FRect>(frames.data() + %d, %d),\n",
 				kebabToCamel(animationName),
 				animationFrames.begin,
 				animationFrames.size)
